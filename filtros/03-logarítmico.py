@@ -5,21 +5,28 @@ Comprime el rango dinámico, resalta detalles en zonas oscuras.
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+import os
+import random
 
-# Generar imagen con zonas claras y oscuras
-img = np.zeros((300, 300, 3), dtype=np.uint8)
-img[0:100, :] = 20      # Zona oscura arriba
-img[100:200, :] = 100   # Zona media
-img[200:300, :] = 200   # Zona clara abajo
-# Añadir patrón para ver el efecto (gradiente de 20 a 255)
-for i in range(300):
-    img[i, :] = int(np.clip(20 + (235 * i / 299), 0, 255))
+# ── Ruta dinámica a imagen RANDOM del dataset ───────────
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+FOLDER   = os.path.join(BASE_DIR, "dataset", "cat")
+IMG_PATH = os.path.join(FOLDER, random.choice(os.listdir(FOLDER)))
+
+img = cv2.imread(IMG_PATH)
+if img is None:
+    raise FileNotFoundError(f"No se encontró la imagen en: {IMG_PATH}")
+
+print(f"Imagen cargada: {IMG_PATH}")
+
+# Convertir a escala de grises para ver mejor el efecto
+img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
 # Convertir a float [0,1]
-img_float = img.astype(np.float32) / 255.0
+img_float = img_gray.astype(np.float32) / 255.0
 
 # Aplicar transformación logarítmica: s = c * log(1 + r)
-c = 1.5  # Constante de escala
+c = 100.0  # Constante de escala
 img_log = c * np.log(1 + img_float)
 
 # Normalizar resultado a [0,1]
@@ -27,19 +34,20 @@ img_log = img_log / np.max(img_log)
 
 # Convertir de vuelta a [0,255]
 resultado = (img_log * 255).astype(np.uint8)
-resultado_color = np.stack([resultado] * 3, axis=2)
 
 # Mostrar resultados
 fig, axes = plt.subplots(1, 2, figsize=(10, 4))
-axes[0].imshow(img, cmap='gray')
-axes[0].set_title('Original (gradiente)')
+
+axes[0].imshow(img_gray, cmap='gray')
+axes[0].set_title('Original')
 axes[0].axis('off')
 
 axes[1].imshow(resultado, cmap='gray')
-axes[1].set_title(f'Filtro Logarítmico (c={c})')
+axes[1].set_title(f'Filtro Logaritmico (c={c})')
 axes[1].axis('off')
 
+plt.suptitle('Filtro Logaritmico', fontsize=14, fontweight='bold')
 plt.tight_layout()
 plt.show()
 
-print("Filtro logarítmico aplicado exitosamente")
+print("Filtro logaritmico aplicado exitosamente")

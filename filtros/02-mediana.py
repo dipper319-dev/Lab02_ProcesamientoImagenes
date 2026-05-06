@@ -5,24 +5,28 @@ Muy efectivo para eliminar ruido salt-and-pepper.
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
-# Generar imagen de prueba
-img = np.ones((300, 300, 3), dtype=np.uint8) * 200  # Fondo blanco
-img[50:150, 50:150] = [50, 50, 50]   # Cuadrado oscuro
+# ── Ruta dinámica a imagen real ─────────────────────────
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+IMG_PATH = os.path.join(BASE_DIR, "dataset", "cat", "cats_00991.jpg")
 
-# Añadir MUCHO ruido salt-and-pepper
+# Cargar imagen real
+img = cv2.imread(IMG_PATH)
+if img is None:
+    raise FileNotFoundError(f"No se encontró la imagen en: {IMG_PATH}")
+
+# Añadir ruido salt-and-pepper
 img_ruidosa = img.copy()
-num_sal = int(img_ruidosa.size * 0.025)  # 2.5% de píxeles blancos
-num_pimienta = int(img_ruidosa.size * 0.025)  # 2.5% de píxeles negros
+num_sal      = int(img_ruidosa.size * 0.025)
+num_pimienta = int(img_ruidosa.size * 0.025)
 
-# Generar coordenadas aleatorias para sal (blanco)
 for _ in range(num_sal):
-    i, j, k = np.random.randint(0, 300), np.random.randint(0, 300), np.random.randint(0, 3)
+    i, j, k = np.random.randint(0, img.shape[0]), np.random.randint(0, img.shape[1]), np.random.randint(0, 3)
     img_ruidosa[i, j, k] = 255
 
-# Generar coordenadas aleatorias para pimienta (negro)
 for _ in range(num_pimienta):
-    i, j, k = np.random.randint(0, 300), np.random.randint(0, 300), np.random.randint(0, 3)
+    i, j, k = np.random.randint(0, img.shape[0]), np.random.randint(0, img.shape[1]), np.random.randint(0, 3)
     img_ruidosa[i, j, k] = 0
 
 # Aplicar filtro de mediana
@@ -30,7 +34,8 @@ for _ in range(num_pimienta):
 resultado = cv2.medianBlur(img_ruidosa, 5)  # Kernel 5x5
 
 # Mostrar resultados
-fig, axes = plt.subplots(1, 3, figsize=(15, 4))
+fig, axes = plt.subplots(1, 3, figsize=(14, 4))
+
 axes[0].imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
 axes[0].set_title('Original')
 axes[0].axis('off')
@@ -43,6 +48,7 @@ axes[2].imshow(cv2.cvtColor(resultado, cv2.COLOR_BGR2RGB))
 axes[2].set_title('Filtro Mediana (5x5)')
 axes[2].axis('off')
 
+plt.suptitle('Filtro de Mediana', fontsize=14, fontweight='bold')
 plt.tight_layout()
 plt.show()
 

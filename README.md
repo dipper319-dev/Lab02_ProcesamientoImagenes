@@ -1,6 +1,7 @@
 <div align="center">
 
 #  Tarea 2 — Filtros de Imagen
+## Los ejemplos en code de cada filtro estan en la carpeta "filtros"
 ### Procesamiento Digital de Imágenes
 
 
