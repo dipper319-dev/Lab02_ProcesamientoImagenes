@@ -1,0 +1,4 @@
+dataset_procesado/
+modelos/*.npy
+modelos/*.pkl
+modelos/*.png
